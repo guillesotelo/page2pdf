@@ -14,12 +14,8 @@
                 "jsPDF/jspdf-html2canvas.min.js",
                 "jsPDF/jspdf.es.js",
                 "jsPDF/jspdf.es.min.js",
-                "jsPDF/jspdf.node.js",
-                "jsPDF/jspdf.node.min.js",
                 "jsPDF/jspdf.umd.js",
                 "jsPDF/jspdf.umd.min.js",
-                "jsPDF/polyfills.es.js",
-                "jsPDF/polyfills.umd.js",
                 "content.js"
             ],
             "run_at": "document_idle"
