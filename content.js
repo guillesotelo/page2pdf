@@ -2,60 +2,58 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if (message.action === "convertToPDF") convertPageToPDF()
 })
 
-const imageUrlToBase64 = async (url) => {
-    const data = await fetch(url)
-    const blob = await data.blob()
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.readAsDataURL(blob)
-        reader.onloadend = () => {
-            const base64data = reader.result
-            resolve(base64data)
+const scrollDownUntilEnd = () => {
+    function isAtPageEnd() {
+        return window.scrollY + window.innerHeight >= document.documentElement.scrollHeight
+    }
+    function scroll() {
+        const x = 0
+        const y = window.scrollY + window.innerHeight
+
+        window.scrollTo({
+            top: y,
+            left: x,
+        })
+        if (!isAtPageEnd()) {
+            scroll()
         }
-        reader.onerror = reject
-    })
+    }
+    scroll()
+}
+
+const imageUrlToBase64 = (img) => {
+    var canvas = document.createElement("canvas")
+    canvas.width = img.width
+    canvas.height = img.height
+    var ctx = canvas.getContext("2d")
+    ctx.drawImage(img, 0, 0)
+    var dataURL = canvas.toDataURL("image/png")
+    return dataURL
 }
 
 const replaceImageSourcesWithBase64 = () => {
     const images = document.querySelectorAll('img')
-    Array.from(images).forEach(img => {
-        img.src = imageUrlToBase64(img.src)
+    Array.from(images).forEach(async img => {
+        const newSource = imageUrlToBase64(img)
+        img.src = newSource
+        console.log('newSource', newSource)
     })
 }
 
 const convertPageToPDF = () => {
     console.log("Converting page to PDF...")
-    window.jsPDF = window.jspdf.jsPDF
-    // replaceImageSourcesWithBase64()
-
-    html2canvas(document.body,
-        {
-            // logging: true,
-            letterRendering: 1,
-            // allowTaint: true,
-            // useCORS: true
-        }
-    ).then(function (canvas) {
-        // Convert the canvas to a data URL
-        var imgData = canvas.toDataURL('image/png')
-        var imgWidth = 210
-        var pageHeight = 295
-        var imgHeight = canvas.height * imgWidth / canvas.width
-        var heightLeft = imgHeight
-        var doc = new jsPDF('p', 'mm')
-        var position = 10 // give some top padding to first page
-
-        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
-
-        while (heightLeft >= 0) {
-            position += heightLeft - imgHeight // top padding for other pages
-            doc.addPage()
-            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-            heightLeft -= pageHeight
-        }
-
-        doc.save("page.pdf")
-        chrome.runtime.sendMessage({ action: "processComplete" })
-    })
+    const title = document.querySelector('title')
+    var options = {
+        margin: 0,
+        filename: `${title.textContent}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            // width: window.innerWidth,
+            allowTaint: true,
+            useCORS: true
+        },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    }
+    html2pdf().set(options).from(document.body).save()
+    chrome.runtime.sendMessage({ action: "processComplete" })
 }

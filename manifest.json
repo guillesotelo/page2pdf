@@ -10,12 +10,12 @@
                 "<all_urls>"
             ],
             "js": [
+                "jsPDF/es6-promise-auto-min.js",
                 "jsPDF/html2canvas.min.js",
                 "jsPDF/jspdf-html2canvas.min.js",
-                "jsPDF/jspdf.es.js",
-                "jsPDF/jspdf.es.min.js",
                 "jsPDF/jspdf.umd.js",
                 "jsPDF/jspdf.umd.min.js",
+                "jsPDF/html2pdf.js",
                 "content.js"
             ],
             "run_at": "document_idle"
